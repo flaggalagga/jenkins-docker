@@ -1,0 +1,77 @@
+version: '3'
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    restart: unless-stopped
+    networks:
+      - jenkins-net
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    restart: unless-stopped
+    networks:
+      - jenkins-net
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /var/www/certbot:/var/www/certbot
+    depends_on:
+      - jenkins
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: unless-stopped
+    networks:
+      - jenkins-net
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_CAKE_TEST_DB},${POSTGRES_LARAVEL_TEST_DB}
+      POSTGRES_TEST_USER: ${DB_TEST_USER}
+      POSTGRES_TEST_PASSWORD: ${DB_TEST_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-postgres-dbs.sh:/docker-entrypoint-initdb.d/init-postgres-dbs.sh
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: unless-stopped
+    networks:
+      - jenkins-net
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_CAKE_TEST_DB: ${MYSQL_CAKE_TEST_DB}
+      MYSQL_LARAVEL_TEST_DB: ${MYSQL_LARAVEL_TEST_DB}
+      MYSQL_TEST_USER: ${DB_TEST_USER}
+      MYSQL_TEST_PASSWORD: ${DB_TEST_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-mysql-dbs.sh:/docker-entrypoint-initdb.d/init-mysql-dbs.sh
+    ports:
+      - "127.0.0.1:3306:3306"
+
+networks:
+  jenkins-net:
+    driver: bridge
+
+volumes:
+  jenkins_home:
+  postgres_data:
+  mysql_data:
