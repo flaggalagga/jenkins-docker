@@ -20,10 +20,10 @@ pipeline {
        stage('Run Tests') {
            steps {
                sh '''
-                   docker-compose run --rm php-test vendor/bin/phpunit -c tests/phpunit.xml
+                   docker-compose run --rm php-test vendor/bin/phpunit -c /app/tests/phpunit.xml
                '''
-           }
-       }
+        }
+     }	
    }
 
    post {
