@@ -1,42 +1,37 @@
 pipeline {
-    agent any
+   agent any
 
-    environment {
-        // Test database credentials
-        TEST_USER = 'testuser'
-        TEST_PASSWORD = credentials('test-db-password')
-        
-        // Test databases
-        LARAVEL_MYSQL_TEST_DB = 'laravel_test_mysql'
-        LARAVEL_PGSQL_TEST_DB = 'laravel_test_pgsql'
-        CAKE_MYSQL_TEST_DB = 'cake_test_mysql'
-        CAKE_PGSQL_TEST_DB = 'cake_test_pgsql'
-    }
+   environment {
+       TEST_USER = 'testuser'
+       TEST_PASSWORD = credentials('test-db-password')
+       LARAVEL_MYSQL_TEST_DB = 'laravel_test_mysql'
+       LARAVEL_PGSQL_TEST_DB = 'laravel_test_pgsql'
+       CAKE_MYSQL_TEST_DB = 'cake_test_mysql'
+       CAKE_PGSQL_TEST_DB = 'cake_test_pgsql'
+   }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
+   stages {
+       stage('Checkout') {
+           steps {
+               checkout scm
+           }
+       }
 
-        stage('Run Tests') {
-            steps {
-                sh '''
-                    cd php-test
-                    # Run all test suites
-                    vendor/bin/phpunit -c tests/phpunit.xml
-                '''
-            }
-        }
-    }
+       stage('Run Tests') {
+           steps {
+               sh '''
+                   docker-compose run --rm php-test vendor/bin/phpunit -c tests/phpunit.xml
+               '''
+           }
+       }
+   }
 
-    post {
-        success {
-            echo 'All tests passed!'
-        }
-        failure {
-            echo 'Tests failed! Check the logs for details.'
-        }
-    }
+   post {
+       success {
+           echo 'All tests passed!'
+       }
+       failure {
+           echo 'Tests failed! Check the logs for details.'
+       }
+   }
 }
