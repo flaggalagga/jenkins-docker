@@ -11,28 +11,12 @@ pipeline {
         LARAVEL_PGSQL_TEST_DB = 'laravel_test_pgsql'
         CAKE_MYSQL_TEST_DB = 'cake_test_mysql'
         CAKE_PGSQL_TEST_DB = 'cake_test_pgsql'
-        
-        // Database root passwords
-        MYSQL_ROOT_PASSWORD = credentials('mysql-root-password')
-        POSTGRES_PASSWORD = credentials('postgres-password')
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Prepare Test Environment') {
-            steps {
-                sh '''
-                    # Start databases
-                    docker-compose up -d mysql postgres
-                    
-                    # Wait for databases to be ready
-                    sleep 30
-                '''
             }
         }
 
@@ -48,12 +32,6 @@ pipeline {
     }
 
     post {
-        always {
-            sh '''
-                # Stop databases
-                docker-compose down
-            '''
-        }
         success {
             echo 'All tests passed!'
         }
