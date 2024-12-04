@@ -2,8 +2,15 @@ pipeline {
     agent any
 
     environment {
+        // Test database credentials
         TEST_USER = 'testuser'
         TEST_PASSWORD = credentials('test-db-password')
+        
+        // Test databases
+        LARAVEL_MYSQL_TEST_DB = 'laravel_test_mysql'
+        LARAVEL_PGSQL_TEST_DB = 'laravel_test_pgsql'
+        CAKE_MYSQL_TEST_DB = 'cake_test_mysql'
+        CAKE_PGSQL_TEST_DB = 'cake_test_pgsql'
     }
 
     stages {
@@ -13,27 +20,23 @@ pipeline {
             }
         }
 
-        stage('Environment Setup') {
-            steps {
-                sh '''
-                    docker-compose down
-                    docker volume rm jenkins-docker_mysql-data jenkins-docker_postgres-data || true
-                    docker-compose up -d
-                    sleep 30  # Wait for databases to initialize
-                '''
-            }
-        }
-
         stage('Run Tests') {
             steps {
-                sh 'docker-compose run --rm php-test vendor/bin/phpunit -c tests/phpunit.xml'
+                sh '''
+                    cd php-test
+                    # Run all test suites
+                    vendor/bin/phpunit -c tests/phpunit.xml
+                '''
             }
         }
     }
 
     post {
-        always {
-            sh 'docker-compose down'
+        success {
+            echo 'All tests passed!'
+        }
+        failure {
+            echo 'Tests failed! Check the logs for details.'
         }
     }
 }
