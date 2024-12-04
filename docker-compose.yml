@@ -9,7 +9,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - jenkins_home:/var/jenkins_home
+      - jenkins-data:/var/jenkins_home
 
   nginx:
     image: nginx:latest
@@ -34,14 +34,15 @@ services:
     networks:
       - jenkins-net
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_CAKE_TEST_DB},${POSTGRES_LARAVEL_TEST_DB}
-      POSTGRES_TEST_USER: ${DB_TEST_USER}
-      POSTGRES_TEST_PASSWORD: ${DB_TEST_PASSWORD}
+      TEST_USER: ${TEST_USER}
+      TEST_PASSWORD: ${TEST_PASSWORD}
+      LARAVEL_PGSQL_TEST_DB: ${LARAVEL_PGSQL_TEST_DB}
+      CAKE_PGSQL_TEST_DB: ${CAKE_PGSQL_TEST_DB}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
       - ./init-postgres-dbs.sh:/docker-entrypoint-initdb.d/init-postgres-dbs.sh
     ports:
       - "127.0.0.1:5432:5432"
@@ -57,21 +58,41 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_CAKE_TEST_DB: ${MYSQL_CAKE_TEST_DB}
-      MYSQL_LARAVEL_TEST_DB: ${MYSQL_LARAVEL_TEST_DB}
-      MYSQL_TEST_USER: ${DB_TEST_USER}
-      MYSQL_TEST_PASSWORD: ${DB_TEST_PASSWORD}
+      TEST_USER: ${TEST_USER}
+      TEST_PASSWORD: ${TEST_PASSWORD}
+      LARAVEL_MYSQL_TEST_DB: ${LARAVEL_MYSQL_TEST_DB}
+      CAKE_MYSQL_TEST_DB: ${CAKE_MYSQL_TEST_DB}
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
       - ./init-mysql-dbs.sh:/docker-entrypoint-initdb.d/init-mysql-dbs.sh
     ports:
       - "127.0.0.1:3306:3306"
+
+  php-test:
+    build: 
+      context: ./php-test
+      dockerfile: Dockerfile
+    container_name: php-test
+    networks:
+      - jenkins-net
+    environment:
+      TEST_USER: ${TEST_USER}
+      TEST_PASSWORD: ${TEST_PASSWORD}
+      LARAVEL_MYSQL_TEST_DB: ${LARAVEL_MYSQL_TEST_DB}
+      CAKE_MYSQL_TEST_DB: ${CAKE_MYSQL_TEST_DB}
+      LARAVEL_PGSQL_TEST_DB: ${LARAVEL_PGSQL_TEST_DB}
+      CAKE_PGSQL_TEST_DB: ${CAKE_PGSQL_TEST_DB}
+    volumes:
+      - ./php-test/tests:/app/tests
 
 networks:
   jenkins-net:
     driver: bridge
 
 volumes:
-  jenkins_home:
-  postgres_data:
-  mysql_data:
+  jenkins-data:
+    name: jenkins-data
+  postgres-data:
+    name: postgres-data
+  mysql-data:
+    name: mysql-data

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         colors="true"
+         stopOnFailure="false">
+    <php>
+        <env name="DB_TEST_USER" value="${TEST_USER}"/>
+        <env name="DB_TEST_PASSWORD" value="${TEST_PASSWORD}"/>
+        
+        <env name="MYSQL_HOST" value="mysql"/>
+        <env name="MYSQL_PORT" value="3306"/>
+        <env name="LARAVEL_MYSQL_TEST_DB" value="${LARAVEL_MYSQL_TEST_DB}"/>
+        <env name="CAKE_MYSQL_TEST_DB" value="${CAKE_MYSQL_TEST_DB}"/>
+        
+        <env name="PGSQL_HOST" value="postgres"/>
+        <env name="PGSQL_PORT" value="5432"/>
+        <env name="LARAVEL_PGSQL_TEST_DB" value="${LARAVEL_PGSQL_TEST_DB}"/>
+        <env name="CAKE_PGSQL_TEST_DB" value="${CAKE_PGSQL_TEST_DB}"/>
+
+    <testsuites>
+        <testsuite name="Laravel">
+            <file>laravel/MySQLTest.php</file>
+            <file>laravel/PostgreSQLTest.php</file>
+            <file>laravel/ModelTest.php</file>
+        </testsuite>
+        <testsuite name="CakePHP">
+            <file>cakephp/MySQLTest.php</file>
+            <file>cakephp/PostgreSQLTest.php</file>
+            <file>cakephp/ModelTest.php</file>
+        </testsuite>
+    </testsuites>
+</phpunit>
