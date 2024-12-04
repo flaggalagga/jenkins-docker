@@ -1,0 +1,1 @@
+{"version":1,"defects":{"Tests\\Laravel\\PostgreSQLTest::testConnection":8,"Tests\\Laravel\\MySQLTest::testConnection":8},"times":{"Tests\\Laravel\\MySQLTest::testConnection":0.041,"Tests\\Laravel\\PostgreSQLTest::testConnection":0.004}}
